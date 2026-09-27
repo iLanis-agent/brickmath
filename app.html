@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BrickMath - honest brick math</title>
+<style>
+  :root { --bg:#161214; --card:#211a1c; --ink:#f4edec; --dim:#b8a5a3; --acc:#c96a5a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding:28px 24px 8px; max-width:980px; margin:0 auto; display:flex; justify-content:space-between; align-items:baseline; }
+  h1 { margin:0; font-size:28px; }
+  h1 span { color:var(--acc); }
+  nav a { color:var(--dim); text-decoration:none; font-size:14px; }
+  main { max-width:980px; margin:0 auto; padding:16px 24px 60px; display:grid; gap:18px; }
+  .card { background:var(--card); border-radius:14px; padding:20px; }
+  .card h2 { margin:0 0 12px; font-size:13px; letter-spacing:1.5px; color:var(--dim); text-transform:uppercase; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; }
+  label { display:block; font-size:13px; color:var(--dim); margin-bottom:4px; }
+  input, select { width:100%; background:#1a1517; border:1px solid #4e3d3e; color:var(--ink); border-radius:8px; padding:9px 10px; font-size:15px; }
+  .hint { font-size:12.5px; color:var(--dim); margin-top:10px; }
+  button { cursor:pointer; border:0; border-radius:9px; padding:11px 16px; font-size:15px; background:var(--acc); color:#2b1210; font-weight:600; }
+  button.ghost { background:#3e3133; color:var(--ink); font-weight:500; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .verdict { font-size:17px; line-height:1.65; }
+  .verdict b { color:var(--acc); }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-top:16px; }
+  .stat { background:#1a1517; border-radius:10px; padding:12px; }
+  .stat .v { font-size:19px; font-weight:700; color:var(--acc); }
+  .stat .k { font-size:12px; color:var(--dim); margin-top:2px; }
+  .warn { background:#332023; border:1px solid #6e4547; border-radius:10px; padding:12px 14px; margin-top:14px; font-size:14px; color:#f0d3d0; }
+  table.bd { width:100%; border-collapse:collapse; margin-top:6px; font-size:14.5px; }
+  table.bd td { padding:7px 4px; border-bottom:1px solid #372b2d; }
+  table.bd td:last-child { text-align:right; color:var(--acc); font-weight:600; }
+  .fine { font-size:12.5px; color:var(--dim); margin-top:8px; }
+  a { color:var(--acc); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Brick<span>Math</span></h1>
+  <nav><a href="index.html">about</a></nav>
+</header>
+<main>
+  <section class="card">
+    <h2>The job</h2>
+    <div class="grid">
+      <div>
+        <label for="type">Brick</label>
+        <select id="type">
+          <option value="modular" selected>Modular (7-5/8 x 2-1/4 in bed)</option>
+          <option value="queen">Queen (7-5/8 x 2-3/4 in bed)</option>
+          <option value="king">King (9-5/8 x 2-5/8 in bed)</option>
+          <option value="paver">Paver (8 x 4 in, sand-set patio)</option>
+        </select>
+      </div>
+      <div>
+        <label for="len">Length (ft)</label>
+        <input id="len" type="number" min="1" max="200" step="0.5" value="10">
+      </div>
+      <div id="hwrap">
+        <label for="hgt">Wall height (ft)</label>
+        <input id="hgt" type="number" min="0.5" max="20" step="0.5" value="8">
+      </div>
+      <div id="wwrap" style="display:none">
+        <label for="wid">Patio width (ft)</label>
+        <input id="wid" type="number" min="1" max="100" step="0.5" value="12">
+      </div>
+      <div>
+        <label for="bond">Bond / pattern</label>
+        <select id="bond">
+          <option value="running" selected>Running bond (10% waste)</option>
+          <option value="soldier">Soldier course (10% waste)</option>
+          <option value="herringbone">Herringbone (15% waste)</option>
+        </select>
+      </div>
+      <div>
+        <label for="pbrick">$ per brick</label>
+        <input id="pbrick" type="number" min="0" max="5" step="0.01" value="0.65">
+      </div>
+      <div id="mwrap">
+        <label for="pmortar">$ per mortar bag (70 lb)</label>
+        <input id="pmortar" type="number" min="0" max="40" step="0.5" value="12">
+      </div>
+    </div>
+    <div class="row">
+      <button id="go">Do the math</button>
+      <button class="ghost" data-preset="planter">Garden wall</button>
+      <button class="ghost" data-preset="mailbox">Mailbox column</button>
+      <button class="ghost" data-preset="patio">Herringbone patio</button>
+    </div>
+    <p class="hint">The count comes from the brick PLUS its 3/8 in joint - a "modular" brick is 7-5/8 in long but lays at 8. Pavers are sand-set, so no mortar; walls get a bag per 35 bricks.</p>
+  </section>
+
+  <section class="card" id="out" hidden>
+    <h2>Your order</h2>
+    <div class="verdict" id="verdict"></div>
+    <div class="stats" id="stats"></div>
+    <div id="warnbox"></div>
+    <table class="bd" id="breakdown"></table>
+    <p class="fine">Materials only. Walls also need ties, flashing, and weep vents; patios need base gravel, bedding sand, and edge restraint. The brick is the visible half of the bill.</p>
+  </section>
+
+  <section class="card">
+    <h2>What the pallet will not tell you</h2>
+    <table class="bd">
+      <tr><td>"About 7 per square foot" is the joint talking</td><td>a modular brick lays at 8 x 2-5/8 with its joint - count from the laid size, never the brick alone, or you come up 5% short</td></tr>
+      <tr><td>Waste is bond-dependent, not luck</td><td>herringbone cuts every edge brick twice; running bond barely cuts at all - 15% vs 10% is the honest spread</td></tr>
+      <tr><td>Mortar dies on the board</td><td>a 70 lb bag lays about 35 bricks and lives about 2 hours; mixing a day's worth at once is how walls get weak joints</td></tr>
+      <tr><td>Bricks vary by the cube, not the piece</td><td>color shifts between production runs - order the whole job from one cube and open several at once to blend</td></tr>
+      <tr><td>Soldier courses eat bricks standing up</td><td>a brick on edge covers a third less wall per piece - that is why the fancy top course costs what it costs</td></tr>
+      <tr><td>The pallet deposit is real money</td><td>return the pallets and the banding; most yards refund $10-25 a pallet if they come back clean</td></tr>
+    </table>
+  </section>
+</main>
+<script src="engine.js"></script>
+<script>
+(function () {
+  function val(id) { return document.getElementById(id).value; }
+  function num(id) { return parseFloat(val(id)) || 0; }
+  function money(x) { return '$' + x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmt(x) { return x.toLocaleString('en-US', { maximumFractionDigits: 2 }); }
+
+  function render() {
+    var patio = val('type') === 'paver';
+    document.getElementById('hwrap').style.display = patio ? 'none' : '';
+    document.getElementById('wwrap').style.display = patio ? '' : 'none';
+    document.getElementById('mwrap').style.display = patio ? 'none' : '';
+    var p = BrickMath.plan({
+      brickType: val('type'), lengthFt: num('len'), heightFt: num('hgt'), widthFt: num('wid'),
+      bond: val('bond'), pricePerBrick: num('pbrick'), pricePerMortarBag: num('pmortar')
+    });
+    if (!(p.area > 0)) { document.getElementById('out').hidden = true; return; }
+
+    var mortarBit = p.mortarBags > 0 ? ' and <b>' + p.mortarBags + ' bags</b> of mortar' : '';
+    document.getElementById('verdict').innerHTML =
+      'Order <b>' + p.orderBricks.toLocaleString('en-US') + ' bricks</b>' + mortarBit +
+      ' for ' + fmt(p.area) + ' sq ft at ' + fmt(p.bricksPerSqFt) + ' bricks per sq ft (laid, with joints). Material total <b>' +
+      money(p.totalCost) + '</b>.';
+
+    var stats = [
+      ['Bricks to order', p.orderBricks.toLocaleString('en-US')],
+      ['Laid per sq ft', fmt(p.bricksPerSqFt)],
+      ['Net needed', p.rawBricks.toLocaleString('en-US')],
+      ['Waste allowance', Math.round((p.wasteMult - 1) * 100) + '%'],
+      ['Mortar', p.mortarBags > 0 ? p.mortarBags + ' bags' : 'sand-set'],
+      ['Material total', money(p.totalCost)]
+    ];
+    document.getElementById('stats').innerHTML = stats.map(function (s) {
+      return '<div class="stat"><div class="v">' + s[1] + '</div><div class="k">' + s[0] + '</div></div>';
+    }).join('');
+
+    var warns = [];
+    if (p.wasteMult >= 1.15)
+      warns.push('Herringbone prices in 15% waste: every perimeter brick gets cut, most of them twice. The offcuts of a 45-degree pattern rarely fit anywhere else.');
+    if (p.mortarBags >= 3)
+      warns.push(p.mortarBags + ' bags of mortar is about ' + Math.ceil(p.mortarBags / 3) + ' mixing sessions - mortar is workable for roughly 2 hours. Mix for the afternoon you have, not the wall you want.');
+    if (p.orderBricks - p.rawBricks >= 10)
+      warns.push('The ' + Math.round(p.orderBricks - p.rawBricks) + ' waste bricks are your future repairs - bricks chip in the saw, and this exact color may not exist in five years. Store a dozen flat and dry.');
+    document.getElementById('warnbox').innerHTML = warns.map(function (w) {
+      return '<div class="warn">' + w + '</div>';
+    }).join('');
+
+    var rows = [['Bricks (' + fmt(p.bricksPerSqFt) + '/sq ft laid, +' + Math.round((p.wasteMult - 1) * 100) + '% waste)', p.orderBricks.toLocaleString('en-US') + ' = ' + money(p.brickCost)]];
+    if (p.mortarBags > 0) rows.push(['Mortar (' + p.mortarBags + ' x 70 lb bags)', money(p.mortarCost)]);
+    rows.push(['Material total', money(p.totalCost)]);
+    document.getElementById('breakdown').innerHTML = rows.map(function (r) {
+      return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>';
+    }).join('');
+    document.getElementById('out').hidden = false;
+  }
+
+  var presets = {
+    planter: { type: 'modular', len: 12, hgt: 2, wid: 12, bond: 'running', pbrick: 0.65, pmortar: 12 },
+    mailbox: { type: 'queen', len: 2, hgt: 4.5, wid: 12, bond: 'soldier', pbrick: 0.7, pmortar: 12 },
+    patio: { type: 'paver', len: 14, hgt: 8, wid: 10, bond: 'herringbone', pbrick: 0.55, pmortar: 12 }
+  };
+  function loadPreset(key) {
+    var pr = presets[key];
+    ['type', 'len', 'hgt', 'wid', 'bond', 'pbrick', 'pmortar'].forEach(function (id) {
+      document.getElementById(id).value = pr[id];
+    });
+    render();
+  }
+
+  document.getElementById('go').addEventListener('click', render);
+  document.querySelectorAll('[data-preset]').forEach(function (b) {
+    b.addEventListener('click', function () { loadPreset(b.getAttribute('data-preset')); });
+  });
+  ['type', 'len', 'hgt', 'wid', 'bond', 'pbrick', 'pmortar'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', render);
+  });
+
+  loadPreset('planter');
+})();
+</script>
+</body>
+</html>
