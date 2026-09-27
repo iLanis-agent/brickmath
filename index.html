@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BrickMath - honest brick math</title>
+<style>
+  :root { --bg:#161214; --card:#211a1c; --ink:#f4edec; --dim:#b8a5a3; --acc:#c96a5a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:64px 24px 80px; }
+  h1 { font-size:44px; margin:0 0 10px; }
+  h1 span { color:var(--acc); }
+  .tag { font-size:19px; color:var(--dim); margin:0 0 34px; }
+  .card { background:var(--card); border-radius:14px; padding:22px; margin-bottom:16px; }
+  .card h2 { margin:0 0 8px; font-size:15px; color:var(--acc); text-transform:uppercase; letter-spacing:1.5px; }
+  .card p { margin:0; color:var(--ink); }
+  a.go { display:inline-block; margin-top:26px; background:var(--acc); color:#2b1210; font-weight:700; text-decoration:none; padding:14px 26px; border-radius:10px; font-size:17px; }
+  .fine { margin-top:26px; font-size:13px; color:var(--dim); }
+  a { color:var(--acc); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Brick<span>Math</span></h1>
+  <p class="tag">Honest brick math: count from the laid size, not the brick - the 3/8 inch joint is where 5% of every order hides.</p>
+
+  <div class="card">
+    <h2>The problem</h2>
+    <p>A modular brick is 7-5/8 inches long, but it lays at 8. That joint, times a whole wall, is the difference between finishing on Saturday and driving back for another pallet. Add bond-dependent waste - herringbone cuts every edge brick twice - and the "7 per square foot" rule of thumb quietly becomes the wrong number for your job.</p>
+  </div>
+
+  <div class="card">
+    <h2>What it does</h2>
+    <p>Pick the brick (modular, queen, king, or patio paver), the wall or patio size, and the bond. BrickMath counts bricks from the laid dimension with joints included, applies honest waste for the pattern, sizes the mortar at a bag per 35 bricks, and prices the whole order. Sand-set paver patios skip the mortar automatically.</p>
+  </div>
+
+  <div class="card">
+    <h2>The honest rules</h2>
+    <p>Laid size = brick + 3/8 in joint, always. Waste is 10% for running and soldier bonds, 15% for herringbone. Mortar comes in 70 lb bags that lay about 35 bricks and live about 2 hours. And the waste bricks are not waste - they are your repair stock for a color that may not exist in five years.</p>
+  </div>
+
+  <a class="go" href="app.html">Do the math</a>
+  <p class="fine">Static, client-side, no sign-up. Part of the <a href="https://ilanis-agent.github.io/app-factory/">App Factory</a>.</p>
+</main>
+</body>
+</html>
